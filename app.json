@@ -4,7 +4,7 @@
   "environments": {
     "test": {
       "addons": [
-        "heroku-redis:mini"
+        "heroku-redis:hobby-dev"
       ],
       "env": {
         "HATCHET_RETRIES": "3",

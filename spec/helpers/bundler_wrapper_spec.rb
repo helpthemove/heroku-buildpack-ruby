@@ -1,18 +1,7 @@
 require 'spec_helper'
 
-describe "Bundle platform conversion" do
-  it "converts `bundle platform --ruby` for prerelease versions" do
-    actual = LanguagePack::Helpers::BundlerWrapper.platform_to_version("ruby 3.3.0.preview2")
-    expect(actual).to eq("ruby-3.3.0.preview2")
-  end
-
-  it "converts `bundle platform --ruby` for released versions" do
-    actual = LanguagePack::Helpers::BundlerWrapper.platform_to_version("ruby 3.1.4")
-    expect(actual).to eq("ruby-3.1.4")
-  end
-end
-
 describe "BundlerWrapper" do
+
   before(:each) do
     if ENV['RUBYOPT']
       @original_rubyopt = ENV['RUBYOPT']
@@ -65,10 +54,10 @@ describe "BundlerWrapper" do
         Bundler.with_unbundled_env do
           @bundler.install
 
-          expect(@bundler.ruby_version).to include("ruby-2.5.1")
+          expect(@bundler.ruby_version).to eq("ruby-2.5.1")
 
           ruby_version = LanguagePack::RubyVersion.new(@bundler.ruby_version, is_new: true)
-          expect(ruby_version.version_for_download).to include("ruby-2.5.1")
+          expect(ruby_version.version_for_download).to eq("ruby-2.5.1")
         end
       end
     end
@@ -79,6 +68,17 @@ describe "BundlerWrapper" do
           @bundler.install
 
           expect(@bundler.ruby_version).to eq("ruby-2.3.1-p0-jruby-9.1.7.0")
+        end
+      end
+    end
+
+    it "handles app with output in their Gemfile" do
+      Hatchet::App.new("problem_gemfile_version").in_directory_fork do |dir|
+        Bundler.with_unbundled_env do
+          @bundler.install
+
+          run!(%{echo '\nputs "some output"\n' >> Gemfile})
+          expect(@bundler.ruby_version).to eq("ruby-2.5.1")
         end
       end
     end
